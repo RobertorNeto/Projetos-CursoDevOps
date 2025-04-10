@@ -35,7 +35,7 @@ Primeiro, faça o clone deste repositório para sua máquina local:
 
 6. Rodar a API localmente
   Com tudo configurado, você pode agora rodar a API localmente. No terminal, execute o comando:
-            ```bash
+   ```bash
                  python app.py
 
 
