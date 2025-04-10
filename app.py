@@ -43,18 +43,17 @@ def obter_ingredientes():
     return jsonify(result)
 
 
-@app.route('/ingredientes',methods=['GET'])
+@app.route('/ingredientes/<string:nome>',methods=['GET'])
 def obter_ingrediente_por_nome(nome):
-    ingredientes = Ingredientes.query.all()
-    result = []
-    for ingrediente in ingredientes:
-        if ingrediente.get('nome') == nome:
-            result.append({
+    ingrediente = Ingredientes.query.filter_by(nome=nome).first()
+    if ingrediente:
+        return jsonify({
             'id': ingrediente.id,
             'nome': ingrediente.nome,
             'unidade_de_medida': ingrediente.unidade_de_medida
-            })
-    return jsonify(result)
+        })
+    else:
+        return jsonify({'message': 'Ingrediente não encontrado'}), 404
 
 
 @app.route('/ingredientes/<string:nome>',methods= ['PUT'])
