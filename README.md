@@ -11,17 +11,17 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
 # Como Rodar o Projeto
 
 1. Clonando o Repositório
+   Primeiro, faça o **clone** deste repositório para sua máquina local:
+    ```bash
+         git clone https://github.com/usuario/API_receitas.git 
+         cd API_receitas
 
-Primeiro, faça o clone deste repositório para sua máquina local:
-         ```bash
-              pip install -r requirements.txt
-
-2. Instalar as dependências
+3. Instalar as dependências
    No diretório do projeto, instale as dependências usando o pip:
    ```bash
               pip install -r requirements.txt
 
-3. Instale o MySQL e crie um banco de dados chamado api_receitas no MySQL:
+4. Instale o MySQL e crie um banco de dados chamado api_receitas no MySQL:
    ```SQL
             CREATE DATABASE api_receitas;
 
