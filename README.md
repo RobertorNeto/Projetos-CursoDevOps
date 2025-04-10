@@ -1,6 +1,6 @@
 # API de Receitas
 
-Este projeto é uma API feita em Flask com MySQL para gerenciar ingredientes e receitas. A API oferece os seguintes endpoints para CRUD (Criar, Ler, Atualizar e Deletar) de ingredientes e Receitas:
+Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredientes e receitas. A API oferece os seguintes endpoints para CRUD (Criar, Ler, Atualizar e Deletar) de ingredientes e Receitas:
 
 - **GET** `/ingredientes`: Retorna todos os ingredientes.
 - **GET** `/ingredientes/<nome>`: Retorna um ingrediente específico pelo nome.
@@ -14,17 +14,16 @@ Este projeto é uma API feita em Flask com MySQL para gerenciar ingredientes e r
 
 Primeiro, faça o clone deste repositório para sua máquina local:
          ```bash
-              git clone https://github.com/usuario/API_receitas.git
-              cd API_receitas
+              pip install -r requirements.txt
 
 2. Instalar as dependências
    No diretório do projeto, instale as dependências usando o pip:
-          ```bash
+   ```bash
               pip install -r requirements.txt
 
 3. Instale o MySQL e crie um banco de dados chamado api_receitas no MySQL:
-           ```SQL
-               CREATE DATABASE api_receitas;
+   ```SQL
+            CREATE DATABASE api_receitas;
 
 5. Crie um arquivo .env para armazenar as credenciais de acesso ao banco de dados.
    Crie o arquivo na raiz do projeto e adicione as variáveis de ambiente:
