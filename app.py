@@ -25,7 +25,7 @@ class Ingredientes(db.Model):
         return f"Ingrediente {self.nome}"
 
 class Receita(db.Model):
-    id = db.Column(db.Integer,primary_key = True, autoincrement = True)
+    id = db.Column(db.Integer,primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100),nullable = False)
     metodo_de_preparo = db.Column(db.Text)
 
@@ -60,7 +60,6 @@ def adicionar_nova_receita():
         return jsonify({'message' : 'Faltando dados obrigatórios'}),400
 
     nova_receita = Receita(
-        id = receita['id'],
         nome = receita['nome'],
         metodo_de_preparo = receita['metodo_de_preparo']
     )
@@ -108,51 +107,72 @@ def obter_receitas():
 
     return jsonify(result)
 
-@app.route('/receitas/<string:nome>',methods=['PUT'])
+@app.route('/receitas/<string:nome>', methods=['PUT'])
 def editar_receitas_por_nome(nome):
-    receita_alterada = request.get_json()
-    receita = Receita.query.filter_by(nome=nome).first()
-    if receita:
+    try:
+        receita_alterada = request.get_json()  # Obter dados da requisição
+        receita = Receita.query.filter_by(nome=nome).first()
 
-        receita.ingredientes.clear()
-        for ing in receita_alterada['ingredientes']:
-            ingrediente = Ingredientes.query.filter_by(nome=ing['nome']).first()
-            if ingrediente:
-                relacao = IngredienteReceita(
-                    id_ingrediente=ingrediente.id,
-                    id_receita=receita.id,
-                    quantidade=ing['quantidade'],   
-                )
-                db.session.add(relacao)
-        db.session.commit()
+        if receita:
+            # Garantir que receita.id não seja None
+            if not receita.id:
+                return jsonify({'message': 'Receita não encontrada ou com ID inválido'}), 404
 
-        ingredientes = []
-        for relacao in receita.ingredientes:
-            ingrediente = {
-                'nome': relacao.ingrediente.nome,
-                'quantidade': relacao.quantidade,
-                'unidade_de_medida': relacao.ingrediente.unidade_de_medida
-            }
-            ingredientes.append(ingrediente)
+            # Limpa os ingredientes antigos da receita
+            receita.ingredientes.clear()
 
-        receita.nome = receita_alterada['nome']
-        receita.metodo_de_preparo = receita_alterada['metodo_de_preparo']
+            # Atualiza os ingredientes da receita com os novos dados
+            for ing in receita_alterada['ingredientes']:
+                ingrediente = Ingredientes.query.filter_by(nome=ing['nome']).first()
 
-        db.session.commit()
+                if ingrediente:
+                    # Cria a relação entre a receita e o ingrediente
+                    relacao = IngredienteReceita(
+                        id_ingrediente=ingrediente.id,
+                        id_receita=receita.id,  # Aqui, `id_receita` é garantido
+                        quantidade=ing['quantidade'],
+                    )
+                    db.session.add(relacao)  # Adiciona a relação ao banco de dados
 
-        return jsonify({
-            'id': receita.id,
-            'nome': receita.nome,
-            'metodo_de_preparo': receita_alterada.metodo_de_preparo,
-            'ingredientes' : ingredientes
-        }), 200
-    
-    else:
-        return jsonify({'message': 'Ingrediente não encontrado'}), 404
+            # Comita as alterações dos ingredientes
+            db.session.commit()
+
+            # Atualiza os dados da receita
+            receita.nome = receita_alterada['nome']
+            receita.metodo_de_preparo = receita_alterada['metodo_de_preparo']
+
+            # Comita as alterações da receita
+            db.session.commit()
+
+            # Organiza os ingredientes para retornar
+            ingredientes = []
+            for relacao in receita.ingredientes:
+                ingrediente_novo = {
+                    'nome': relacao.ingrediente.nome,
+                    'quantidade': relacao.quantidade,
+                    'unidade_de_medida': relacao.ingrediente.unidade_de_medida
+                }
+                ingredientes.append(ingrediente_novo)
+
+            # Retorna os dados da receita atualizada
+            return jsonify({
+                'id': receita.id,
+                'nome': receita.nome,
+                'metodo_de_preparo': receita_alterada['metodo_de_preparo'],
+                'ingredientes': ingredientes
+            }), 200
+
+        else:
+            return jsonify({'message': 'Receita não encontrada'}), 404
+
+    except Exception as e:
+        # Captura exceções e retorna a mensagem de erro
+        return jsonify({'message': f'Ocorreu um erro ao atualizar a receita: {str(e)}'}), 500
+
     
 
 @app.route('/receitas/<string:nome>',methods=['DELETE'])
-def excluir_receitas(nome):
+def excluir_receitas(nome): 
     receita = Receita.query.filter_by(nome = nome).first()
     if receita:
         IngredienteReceita.query.filter_by(id_receita=receita.id).delete()
@@ -223,7 +243,6 @@ def adicionar_novo_ingrediente():
         return jsonify({'message' : 'Faltando dados obrigatórios'}), 400
     
     ingrediente = Ingredientes(
-        id = novo_ingrediente.get('id'),
         nome= novo_ingrediente.get('nome'),
         unidade_de_medida = novo_ingrediente.get('unidade_de_medida')
         )
@@ -244,15 +263,21 @@ def adicionar_novo_ingrediente():
 def excluir_ingrediente(nome):
     ingrediente = Ingredientes.query.filter_by(nome=nome).first()
     if ingrediente:
+
+        ingredientes_tabelarelacao = IngredienteReceita.query.filter_by(id_ingrediente = ingrediente.id).all()
+        for ingrediente_relacao in  ingredientes_tabelarelacao:
+            db.session.delete(ingrediente_relacao)  
+
         db.session.delete(ingrediente)
-        db.session.commit()
+        db.session.commit() 
+
         return jsonify({'message': 'Ingrediente excluído com sucesso'}),200
     else:
         return jsonify({'message': 'Ingrediente não encontrado'}), 404
     
 
 
-with app.app_context():
+with app.app_context(): 
     db.create_all() 
     
 if __name__ == "__main__":
