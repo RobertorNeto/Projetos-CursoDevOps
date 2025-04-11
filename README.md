@@ -10,8 +10,8 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
 - 
 - **GET** `/receitas`: Retorna todos as receitas.
 - **POST** `/receitas`: Adiciona uma nova receita.
-- **PUT** `/receitas/<nome>`: Atualiza as informações de uma receita existente.
-- **DELETE** `/receitas/<nome>`: Exclui uma receita.
+- **PUT** `/receitas/<nome%20...>`: Atualiza as informações de uma receita existente.
+- **DELETE** `/receitas/<nome%20...>`: Exclui uma receita.
 
 
 # Como Rodar o Projeto
