@@ -32,7 +32,7 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
             CREATE DATABASE api_receitas;
 
 5. Crie um arquivo .env para armazenar as credenciais de acesso ao banco de dados.
-   Crie o arquivo na raiz do projeto e adicione as variáveis de ambiente:
+   Crie o arquivo na raiz do projeto, mude o caminho da função no app.py load_dotenv(dotenv_path= 'seu_caminho_arquivo') adicione as variáveis de ambiente:
    MYSQL_USER=seu_usuario
    MYSQL_PASSWORD=sua_senha
    MYSQL_HOST=localhost
