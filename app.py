@@ -1,7 +1,6 @@
 from flask import Flask,jsonify,request,make_response
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-from flask_migrate import Migrate
 import os   
 
 load_dotenv(dotenv_path= 'C:\\Users\\rbcor\\OneDrive\\Desktop\\API_receitas\\variaveis.env')
@@ -11,8 +10,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('MYSQL_USER')}:{os.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
-migrate = Migrate(app, db)
 
 class Ingredientes(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -109,65 +106,59 @@ def obter_receitas():
 
 @app.route('/receitas/<string:nome>', methods=['PUT'])
 def editar_receitas_por_nome(nome):
+    receita_alterada = request.get_json()  
+    receita = Receita.query.filter_by(nome=nome).first()
+
+    if not receita:
+        return jsonify({'message': 'Receita não encontrada'}), 404
+
     try:
-        receita_alterada = request.get_json()  # Obter dados da requisição
-        receita = Receita.query.filter_by(nome=nome).first()
-
-        if receita:
-            # Garantir que receita.id não seja None
-            if not receita.id:
-                return jsonify({'message': 'Receita não encontrada ou com ID inválido'}), 404
-
-            # Limpa os ingredientes antigos da receita
-            receita.ingredientes.clear()
-
-            # Atualiza os ingredientes da receita com os novos dados
-            for ing in receita_alterada['ingredientes']:
-                ingrediente = Ingredientes.query.filter_by(nome=ing['nome']).first()
-
-                if ingrediente:
-                    # Cria a relação entre a receita e o ingrediente
-                    relacao = IngredienteReceita(
-                        id_ingrediente=ingrediente.id,
-                        id_receita=receita.id,  # Aqui, `id_receita` é garantido
-                        quantidade=ing['quantidade'],
-                    )
-                    db.session.add(relacao)  # Adiciona a relação ao banco de dados
-
-            # Comita as alterações dos ingredientes
-            db.session.commit()
-
-            # Atualiza os dados da receita
+        # Atualiza o nome e método de preparo se fornecidos
+        if "nome" in receita_alterada:
             receita.nome = receita_alterada['nome']
+        
+        if "metodo_de_preparo" in receita_alterada:
             receita.metodo_de_preparo = receita_alterada['metodo_de_preparo']
 
-            # Comita as alterações da receita
+        if "ingredientes" in receita_alterada:
+            # Remove os ingredientes antigos da receita
+            for ingrediente in receita.ingredientes_relacionados:
+                db.session.delete(ingrediente)  
             db.session.commit()
 
-            # Organiza os ingredientes para retornar
-            ingredientes = []
-            for relacao in receita.ingredientes:
-                ingrediente_novo = {
-                    'nome': relacao.ingrediente.nome,
-                    'quantidade': relacao.quantidade,
-                    'unidade_de_medida': relacao.ingrediente.unidade_de_medida
-                }
-                ingredientes.append(ingrediente_novo)
+            # Adiciona os novos ingredientes
+            for item in receita_alterada['ingredientes']:
+                # Procurar o ingrediente pelo nome
+                ingrediente_nome = item['nome']
+                quantidade = item['quantidade']
 
-            # Retorna os dados da receita atualizada
-            return jsonify({
-                'id': receita.id,
-                'nome': receita.nome,
-                'metodo_de_preparo': receita_alterada['metodo_de_preparo'],
-                'ingredientes': ingredientes
-            }), 200
+                # Verificar se o ingrediente já existe no banco de dados
+                ingrediente_atual = Ingredientes.query.filter_by(nome=ingrediente_nome).first()
+                if not ingrediente_atual:
+                    return jsonify({"message": f'Ingrediente {ingrediente_nome} não encontrado no banco de dados'}), 404
+                
+                # Criar a associação entre a receita e o ingrediente
+                novo_ingrediente = IngredienteReceita(
+                    id_receita=receita.id,
+                    id_ingrediente=ingrediente_atual.id,
+                    quantidade=quantidade
+                )
+                db.session.add(novo_ingrediente)
 
-        else:
-            return jsonify({'message': 'Receita não encontrada'}), 404
+            db.session.commit()
+
+        # Retorna os dados atualizados da receita
+        return jsonify({
+            'id': receita.id,
+            'nome': receita.nome,
+            'metodo_de_preparo': receita.metodo_de_preparo,
+            'ingredientes': [{'nome': i.ingrediente.nome, 'quantidade': i.quantidade} for i in receita.ingredientes_relacionados]
+        }), 200
 
     except Exception as e:
-        # Captura exceções e retorna a mensagem de erro
+        db.session.rollback()
         return jsonify({'message': f'Ocorreu um erro ao atualizar a receita: {str(e)}'}), 500
+
 
     
 
