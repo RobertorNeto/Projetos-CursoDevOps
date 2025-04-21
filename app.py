@@ -1,4 +1,4 @@
-from flask import Flask,jsonify,request,make_response
+from flask import Flask,jsonify,request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os   
@@ -18,8 +18,6 @@ class Ingredientes(db.Model):
 
     receitas = db.relationship('IngredienteReceita', backref='ingredientes_relacionados', lazy=True)
     
-    def __repr__(self):
-        return f"Ingrediente {self.nome}"
 
 class Receita(db.Model):
     id = db.Column(db.Integer,primary_key=True, autoincrement=True)
@@ -28,10 +26,6 @@ class Receita(db.Model):
 
     ingredientes = db.relationship('IngredienteReceita', backref='receita_relacionada', lazy=True)
 
-
-
-    def __repr__(self):
-        return f"Receita {self.nome}"
     
 class IngredienteReceita(db.Model):
     __tablename__ = 'ingrediente_receita'
@@ -48,6 +42,9 @@ class IngredienteReceita(db.Model):
     def unidade_de_medida(self):
         return self.ingrediente.unidade_de_medida
     
+
+
+#----Receitas----#
 
 @app.route('/receitas',methods=['POST'])  
 def adicionar_nova_receita():
@@ -104,6 +101,32 @@ def obter_receitas():
 
     return jsonify(result)
 
+@app.route('/receitas/<string:nome>', methods=['GET'])
+def obter_receita_por_nome(nome):
+    receita = Receita.query.filter_by(nome=nome).first()
+
+    if not receita:
+        return jsonify({"message": "Receita não encontrada."}), 404
+
+    ingredientes = []
+    for ing in receita.ingredientes:
+        ingrediente = {
+            'id': ing.id,
+            'nome': ing.ingrediente.nome,
+            'quantidade': ing.quantidade,
+            'unidade_de_medida': ing.ingrediente.unidade_de_medida
+        }
+        ingredientes.append(ingrediente)
+
+    result = {
+        'id': receita.id,
+        'nome': receita.nome,
+        'metodo_de_preparo': receita.metodo_de_preparo,
+        'ingredientes': ingredientes
+    }
+
+    return jsonify(result), 200
+
 @app.route('/receitas/<string:nome>', methods=['PUT'])
 def editar_receitas_por_nome(nome):
     receita_alterada = request.get_json()  
@@ -113,7 +136,6 @@ def editar_receitas_por_nome(nome):
         return jsonify({'message': 'Receita não encontrada'}), 404
 
     try:
-        # Atualiza o nome e método de preparo se fornecidos
         if "nome" in receita_alterada:
             receita.nome = receita_alterada['nome']
         
@@ -121,23 +143,18 @@ def editar_receitas_por_nome(nome):
             receita.metodo_de_preparo = receita_alterada['metodo_de_preparo']
 
         if "ingredientes" in receita_alterada:
-            # Remove os ingredientes antigos da receita
             for ingrediente in receita.ingredientes_relacionados:
                 db.session.delete(ingrediente)  
             db.session.commit()
 
-            # Adiciona os novos ingredientes
             for item in receita_alterada['ingredientes']:
-                # Procurar o ingrediente pelo nome
                 ingrediente_nome = item['nome']
                 quantidade = item['quantidade']
 
-                # Verificar se o ingrediente já existe no banco de dados
                 ingrediente_atual = Ingredientes.query.filter_by(nome=ingrediente_nome).first()
                 if not ingrediente_atual:
                     return jsonify({"message": f'Ingrediente {ingrediente_nome} não encontrado no banco de dados'}), 404
                 
-                # Criar a associação entre a receita e o ingrediente
                 novo_ingrediente = IngredienteReceita(
                     id_receita=receita.id,
                     id_ingrediente=ingrediente_atual.id,
@@ -147,7 +164,6 @@ def editar_receitas_por_nome(nome):
 
             db.session.commit()
 
-        # Retorna os dados atualizados da receita
         return jsonify({
             'id': receita.id,
             'nome': receita.nome,
@@ -161,7 +177,6 @@ def editar_receitas_por_nome(nome):
 
 
     
-
 @app.route('/receitas/<string:nome>',methods=['DELETE'])
 def excluir_receitas(nome): 
     receita = Receita.query.filter_by(nome = nome).first()
@@ -175,7 +190,7 @@ def excluir_receitas(nome):
         return jsonify({'message': 'Receita não encontrada'}), 404
 
 
-
+#----Ingredientes----#
 
 
 @app.route('/ingredientes',methods=['GET'])
