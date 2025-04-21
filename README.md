@@ -2,14 +2,16 @@
 
 Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredientes e receitas. A API oferece os seguintes endpoints para CRUD (Criar, Ler, Atualizar e Deletar) de ingredientes e Receitas:
 
+**INGREDIENTES**
 - **GET** `/ingredientes`: Retorna todos os ingredientes.
 - **GET** `/ingredientes/<nome>`: Retorna um ingrediente específico pelo nome.
 - **POST** `/ingredientes`: Adiciona um novo ingrediente.
 - **PUT** `/ingredientes/<nome>`: Atualiza as informações de um ingrediente existente.
 - **DELETE** `/ingredientes/<nome>`: Exclui um ingrediente.
 
-  
+**RECEITAS**
 - **GET** `/receitas`: Retorna todos as receitas.
+- **GET** `/receitas/<nome%20...>`: Retorna uma receita específica pelo nome.
 - **POST** `/receitas`: Adiciona uma nova receita.
 - **PUT** `/receitas/<nome%20...>`: Atualiza as informações de uma receita existente.
 - **DELETE** `/receitas/<nome%20...>`: Exclui uma receita.
