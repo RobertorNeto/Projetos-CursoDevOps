@@ -7,7 +7,7 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
 - **POST** `/ingredientes`: Adiciona um novo ingrediente.
 - **PUT** `/ingredientes/<nome>`: Atualiza as informações de um ingrediente existente.
 - **DELETE** `/ingredientes/<nome>`: Exclui um ingrediente.
-- 
+  
 - **GET** `/receitas`: Retorna todos as receitas.
 - **POST** `/receitas`: Adiciona uma nova receita.
 - **PUT** `/receitas/<nome%20...>`: Atualiza as informações de uma receita existente.
