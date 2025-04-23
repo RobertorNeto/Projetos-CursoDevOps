@@ -33,7 +33,6 @@ class IngredienteReceita(db.Model):
     id_ingrediente = db.Column(db.Integer, db.ForeignKey('ingredientes.id'), nullable=False)
     id_receita = db.Column(db.Integer, db.ForeignKey('receita.id'), nullable=False)
     quantidade = db.Column(db.Float, nullable=False)   
-    unidade_de_medida = db.Column(db.String(100), nullable=False)
 
     ingrediente = db.relationship('Ingredientes', backref='receitas_relacionadas', lazy=True)
     receita = db.relationship('Receita', backref='ingredientes_relacionados', lazy=True)
