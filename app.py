@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os   
 
-load_dotenv(dotenv_path= 'C:\\Users\\rbcor\\OneDrive\\Desktop\\API_receitas\\variaveis.env')
+load_dotenv(dotenv_path= 'seu_caminho')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@{os.getenv('MYSQL_HOST')}/{os.getenv('MYSQL_DB')}"
