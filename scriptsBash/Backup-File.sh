@@ -1,4 +1,5 @@
 #!/bin/bash
+#atividade para criar um arquivo de backup com base em uma entrada com uma lista de arquivos ou diretorios
 
 echo "Manda o array de arquivos"
 read -a lista_arquivos
