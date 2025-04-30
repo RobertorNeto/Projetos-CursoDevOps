@@ -1,4 +1,5 @@
 #!/bin/bash
+#atividade para criar um repositorio novo para uma api com base em um template de um outro repositorio de api.
 
 echo "Escolha o nome do novo projeto"
 read nome_projeto
