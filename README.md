@@ -19,8 +19,7 @@ Este projeto é uma API feita em **Flask** com **MySQL** com containerização v
 
 # Como Rodar o Projeto
 
-1. Rodar a API localmente via docker
-   Para rodar via docker-compose, garanta que tenha o docker instalado na sua máquina, faça um:
+1. Rodar a API localmente via docker-compose, garanta que tenha o docker instalado na sua máquina, faça um:
      ```bash
          git clone https://github.com/usuario/API_receitas.git 
          cd API_receitas
