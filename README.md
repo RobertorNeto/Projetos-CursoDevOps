@@ -1,6 +1,6 @@
 # API de Receitas
 
-Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredientes e receitas. A API oferece os seguintes endpoints para CRUD (Criar, Ler, Atualizar e Deletar) de ingredientes e Receitas:
+Este projeto é uma API feita em **Flask** com **MySQL** com containerização via **Docker** para gerenciar ingredientes e receitas. A API oferece os seguintes endpoints para CRUD (Criar, Ler, Atualizar e Deletar) de ingredientes e Receitas:
 
 **INGREDIENTES**
 - **GET** `/ingredientes`: Retorna todos os ingredientes.
@@ -19,6 +19,15 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
 
 # Como Rodar o Projeto
 
+0. Rodar a API localmente via docker
+   Para rodar via docker-compose, garanta que tenha o docker instalado na sua máquina, faça um:
+     ```bash
+         git clone https://github.com/usuario/API_receitas.git 
+         cd API_receitas
+   e depois dê um build no docker-compose:
+   ```bash
+         docker-compose up --build
+     
 1. Clonando o Repositório
    Primeiro, faça o **clone** deste repositório para sua máquina local:
     ```bash
@@ -45,7 +54,6 @@ Este projeto é uma API feita em **Flask** com **MySQL** para gerenciar ingredie
   Com tudo configurado, você pode agora rodar a API localmente. No terminal, execute o comando:
    ```bash
          python app.py
-
-
+   
 
 
