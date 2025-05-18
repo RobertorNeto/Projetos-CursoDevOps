@@ -26,6 +26,8 @@ Este projeto é uma API feita em **Flask** com **MySQL** com containerização v
          cd API_receitas
          docker-compose up --build
      
+- **Para fazer sem docker:**
+  
 2. Clonando o Repositório
    Primeiro, faça o **clone** deste repositório para sua máquina local:
     ```bash
