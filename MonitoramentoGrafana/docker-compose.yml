@@ -1,0 +1,130 @@
+volumes:
+  grafana_data:
+
+  prometheus_data:
+
+  loki_data:
+
+  db_data:
+
+networks:
+  default:
+  monitoring:
+
+services:
+  grafana:
+    image: grafana/grafana:11.6.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/grafana.ini:/etc/grafana/grafana.ini
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: on-failure
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    ports:
+      - 9090:9090
+    volumes:
+      - prometheus_data:/prometheus
+      - ./config/prometheus/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=60d'
+      - '--web.enable-remote-write-receiver'
+      - '--enable-feature=native-histograms'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: on-failure
+    links:
+    - node-exporter:node-exporter
+    networks:
+    - monitoring
+
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    volumes:
+      - '/:/host:ro'
+    command:
+      - '--path.rootfs=/host' 
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+
+
+  loki:
+    image: grafana/loki:3.5.1
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+    - ./config/loki/config.yml:/etc/loki/config.yml
+    - ./loki/tsdb:/data/tsdb
+    - ./loki/retention:/data/retention
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/config.yml
+    restart: on-failure
+    networks:
+      - monitoring
+
+  app:
+    build: .
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=senha123
+      - MYSQL_DB=api_receitas
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    networks:
+      - default
+      - monitoring 
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: senha123
+      MYSQL_DATABASE: api_receitas
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-psenha123"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+    networks:
+      - default
+
+
+
