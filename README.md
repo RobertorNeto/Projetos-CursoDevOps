@@ -1,6 +1,6 @@
 # Curso de DevOps - Projetos e Scripts
 
-Este repositório contém todos os projetos e scripts que desenvolvi durante o **Curso de DevOps**. O objetivo deste repositório é demonstrar o uso de diversas ferramentas e práticas de DevOps, incluindo **automação**, **monitoramento**, **containers**, **infraestrutura como código** e **integração contínua/entrega contínua (CI/CD)**.
+Este repositório contém todos os projetos e scripts que desenvolvi durante o **Curso de DevOps** promovido pela **Lacuna Software**. O objetivo deste repositório é demonstrar o uso de diversas ferramentas e práticas de DevOps, incluindo **automação**, **monitoramento**, **containers**, **infraestrutura como código** e **integração contínua/entrega contínua (CI/CD)**.
 
 ## Índice
 
