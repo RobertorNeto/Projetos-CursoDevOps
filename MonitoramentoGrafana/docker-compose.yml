@@ -7,13 +7,15 @@ volumes:
 
   db_data:
 
+  tempo_data:
+
 networks:
   default:
   monitoring:
 
 services:
   grafana:
-    image: grafana/grafana:11.6.2
+    image: grafana/grafana:12.0.0
     ports:
       - "3000:3000"
     volumes:
@@ -22,6 +24,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor metricsSummary
+      - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-exploretraces-app/grafana-exploretraces-app-latest.zip;grafana-traces-app
     restart: on-failure
     networks:
       - monitoring
@@ -41,12 +45,47 @@ services:
       - '--enable-feature=native-histograms'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--enable-feature=exemplar-storage'
     restart: on-failure
     links:
     - node-exporter:node-exporter
     networks:
     - monitoring
+  
+  init-tempo:
+    image: &tempoImage grafana/tempo:2.8.0
+    user: root
+    entrypoint: 
+    - "chown"
+    - "10001:10001"
+    - "/var/tempo"
+    volumes:
+    - ./tempo-data:/var/tempo
 
+  memcached:
+    image: memcached:1.6.38
+    container_name: memcached
+    environment:
+      - MEMCACHED_MAX_MEMORY=64m
+      - MEMCACHED_THREADS=4
+    ports:
+      - "11211:11211"
+
+  tempo:
+    image: *tempoImage
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/var/tempo
+    ports:
+      - "3200:3200" 
+      - "4317:4317"  
+      - "4318:4318"
+    depends_on:
+      - init-tempo
+      - memcached
+    networks:
+      - monitoring
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -90,13 +129,18 @@ services:
     build: .
     ports:
       - "5001:5000"
+      - "8000:8000"
     environment:
       - FLASK_APP=app.py
-      - FLASK_ENV=development
+      - FLASK_ENV=developments
       - MYSQL_HOST=db
       - MYSQL_USER=root
       - MYSQL_PASSWORD=senha123
       - MYSQL_DB=api_receitas
+      - OTEL_SERVICE_NAME=api-receitas
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317 
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
     volumes:
       - .:/app
     depends_on:
@@ -105,7 +149,6 @@ services:
       loki:
         condition: service_healthy
     networks:
-      - default
       - monitoring 
 
   db:
@@ -124,7 +167,4 @@ services:
       retries: 10
 
     networks:
-      - default
-
-
-
+      - monitoring
