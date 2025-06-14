@@ -1,0 +1,35 @@
+---
+server:
+  http_listen_port: 3100
+
+schema_config:
+  configs:
+    - from: 2025-06-06
+      store: tsdb
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+        
+limits_config:
+  volume_enabled: true
+  retention_period: 24h
+  
+auth_enabled: false
+
+compactor:
+  working_directory: /data/retention
+  retention_enabled: true
+  compaction_interval: 15m
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 10
+  delete_request_store: filesystem
+  
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /data/tsdb/index
+    cache_location: /data/tsdb/cache
+
+ruler:
+  alertmanager_url: http://localhost:9093
