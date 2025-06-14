@@ -18,7 +18,7 @@ Este repositório contém os **códigos e configurações** usados durante o cur
 - **GitHub Actions** (CI/CD)
 - **Terraform** (Infraestrutura como Código)
 - **Grafana** (monitoramento)
-- **Prometheus/Loki** (monitoramento)
+- **Prometheus com Loki/Tempo e Opentelemetry** (monitoramento)
 - **Azure**(Cloud Infrastructure)
 
 
